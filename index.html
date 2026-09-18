@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>杭一棉 · 一团棉花如何变成一根纱</title>
+<style>
+:root{
+  --paper:#f7efdf;
+  --paper2:#efe1c8;
+  --ink:#3b2a21;
+  --muted:#7d6859;
+  --brown:#875632;
+  --brown2:#b88658;
+  --line:#d8c7ad;
+  --green:#6f8a63;
+  --green2:#9eb58f;
+  --teal:#4f8277;
+  --orange:#d87c46;
+  --red:#a94d39;
+  --shadow:0 18px 50px rgba(70,45,30,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#ded6c7;color:var(--ink);font-family:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif}
+body{min-height:100vh}
+button{font:inherit}
+#app{width:100%;max-width:460px;margin:0 auto;min-height:100vh;background:
+ radial-gradient(circle at 20% 10%,rgba(255,255,255,.75),transparent 28%),
+ linear-gradient(180deg,#fbf4e8 0%,#f3e7d2 100%); position:relative;overflow:hidden}
+.paper-noise{position:absolute;inset:0;pointer-events:none;opacity:.17;background-image:
+  radial-gradient(#6d5a49 0.35px,transparent .35px);background-size:5px 5px;mix-blend-mode:multiply}
+.ink-bg{position:absolute;left:-8%;right:-8%;bottom:0;height:40%;opacity:.12;pointer-events:none}
+.screen{display:none;position:relative;min-height:100vh;padding:calc(16px + env(safe-area-inset-top)) 18px calc(22px + env(safe-area-inset-bottom))}
+.screen.active{display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;z-index:2}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700}
+.brand .seal{width:34px;height:34px;border:1.5px solid #aa7f56;border-radius:50%;display:grid;place-items:center;font-size:11px;line-height:1.1;text-align:center}
+.mini{font-size:12px;color:var(--muted)}
+.back{width:42px;height:42px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.4);color:var(--ink)}
+.menu{width:42px;height:42px;border:none;border-radius:14px;background:rgba(255,255,255,.45);color:var(--ink);font-size:20px}
+.hero{padding:22px 6px 8px;text-align:left;z-index:2}
+.hero h1{font-family:STKaiti,KaiTi,serif;font-size:42px;line-height:1.18;margin:10px 0 10px;letter-spacing:.02em}
+.hero p{margin:0;color:var(--muted);font-size:14px}
+.art-card{position:relative;border-radius:30px;background:rgba(255,255,255,.30);border:1px solid rgba(166,137,106,.28);padding:16px;box-shadow:var(--shadow);overflow:hidden}
+.cover-art{margin-top:auto;margin-bottom:18px}
+.primary{height:54px;border:none;border-radius:18px;background:linear-gradient(180deg,#99663f,#7a4b2c);color:white;font-weight:700;letter-spacing:.08em;box-shadow:0 10px 26px rgba(122,75,44,.22)}
+.secondary{height:48px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.35);color:var(--ink);font-weight:650}
+.cover-foot{display:flex;justify-content:center;gap:18px;margin-top:10px;color:var(--muted);font-size:11px}
+.title-row{padding:10px 0 8px;text-align:center}
+.title-row h2{font-family:STKaiti,KaiTi,serif;font-size:28px;margin:0}
+.title-row .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.process-map{margin-top:10px;padding:12px 8px 16px}
+.path{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+.path:before{content:"";position:absolute;left:50%;top:12%;bottom:12%;width:2px;background:repeating-linear-gradient(to bottom,#b79372 0 10px,transparent 10px 20px);opacity:.55}
+.node{position:relative;background:rgba(255,255,255,.26);border:1px solid rgba(166,137,106,.25);border-radius:24px;padding:12px 10px 10px;min-height:150px;text-align:center;display:flex;flex-direction:column;justify-content:flex-end}
+.node:nth-child(even){margin-top:34px}
+.badge{position:absolute;top:9px;left:9px;width:28px;height:28px;border-radius:50%;background:#7b4d30;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.node span{font-weight:700;margin-top:6px}
+.node small{color:var(--muted);font-size:11px;margin-top:2px}
+.progress{display:flex;justify-content:center;gap:7px;margin:7px 0 10px}
+.dot{width:7px;height:7px;border-radius:50%;background:#d8c7ad}
+.dot.on{background:#8a5735;transform:scale(1.15)}
+.stage{font-family:STKaiti,KaiTi,serif;font-size:29px;text-align:center;margin:2px 0}
+.interact-card{flex:1;min-height:560px;margin:4px 0 12px;border-radius:30px;background:rgba(255,255,255,.31);border:1px solid rgba(166,137,106,.28);position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.tip{position:absolute;left:50%;top:18px;transform:translateX(-50%);max-width:88%;padding:10px 13px;border-radius:15px;background:rgba(255,255,255,.77);border:1px solid #e5d7c1;color:var(--ink);font-size:13px;z-index:9;text-align:center;box-shadow:0 7px 20px rgba(74,53,34,.08)}
+.gesture{position:absolute;z-index:12;pointer-events:none;left:50%;top:42%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:8px;color:#744a2c;font-weight:700}
+.gesture .hand{font-size:38px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.08))}
+.gesture.swipe{animation:swipe 1.5s infinite ease-in-out}
+.gesture.circle{animation:circle 2s infinite linear}
+.gesture.down{animation:down 1.2s infinite ease-in-out}
+@keyframes swipe{0%,100%{transform:translate(-75%,-50%)}50%{transform:translate(-25%,-50%)}}
+@keyframes circle{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes down{0%,100%{transform:translate(-50%,-70%)}50%{transform:translate(-50%,-30%)}}
+.feedback{position:absolute;left:18px;right:18px;bottom:18px;padding:12px;border-radius:16px;background:rgba(255,250,240,.88);border:1px solid #e2d4be;color:var(--muted);font-size:12px;text-align:center;z-index:10}
+.nextbar{display:flex;gap:10px}
+.nextbar .primary{flex:1}
+.nextbar .secondary{width:94px}
+.done-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:999px;background:#e9f0e2;color:#54704b;font-size:12px;font-weight:700;border:1px solid #c8d8bd}
+.hidden{display:none!important}
+
+/* 清花 */
+.clean-scene{position:absolute;inset:72px 8px 64px}
+.cotton-bin{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);width:240px;height:175px;border:5px solid #6f8792;border-top-width:9px;border-radius:22px 22px 34px 34px;background:linear-gradient(#91a7ae,#708994);box-shadow:inset 0 -16px 0 rgba(0,0,0,.06)}
+.cotton-puff{position:absolute;background:#fff7e8;border:2px solid #caa987;border-radius:50%;box-shadow:inset -6px -8px 0 rgba(221,199,166,.25)}
+.cotton-puff.p1{width:120px;height:88px;left:18px;bottom:58px}
+.cotton-puff.p2{width:128px;height:92px;left:86px;bottom:66px}
+.cotton-puff.p3{width:86px;height:66px;left:52px;bottom:106px}
+.trash-basket{position:absolute;right:10px;bottom:16px;width:94px;height:80px;border:3px solid #8c6749;border-radius:12px 12px 28px 28px;background:repeating-linear-gradient(90deg,#caa172 0 8px,#b88a59 8px 15px);opacity:.95}
+.debris{position:absolute;width:34px;height:34px;touch-action:none;cursor:grab;z-index:7}
+.debris svg{width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.12))}
+
+/* 梳棉 */
+.carding-scene{position:absolute;inset:86px 14px 72px}
+.machine-body{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:320px;height:230px;border-radius:28px;background:#5f8d87;border:4px solid #395c58;box-shadow:inset 0 -15px 0 rgba(0,0,0,.07)}
+.roller{position:absolute;border-radius:50%;border:7px solid #b36c46;background:radial-gradient(circle at 40% 35%,#e4c38f 0 32%,#98745b 34% 100%)}
+.roller.r1{width:125px;height:125px;left:34px;top:42px}
+.roller.r2{width:98px;height:98px;right:30px;top:56px}
+.fiber-zone{position:absolute;left:24px;right:24px;bottom:24px;height:86px;border-radius:18px;background:rgba(255,250,240,.82);overflow:hidden;border:1px solid #d9c8ae}
+.fline{position:absolute;height:3px;border-radius:4px;background:#c7ab86;transform-origin:left center;transition:.35s ease}
+
+/* 并条 */
+.draw-scene{position:absolute;inset:86px 14px 72px}
+.draw-machine{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:120px;height:170px;border:4px solid #395c58;border-radius:24px;background:#67948d}
+.draw-machine:before{content:"";position:absolute;left:-25px;top:60px;width:38px;height:50px;border-radius:12px;background:#466c67;border:3px solid #395c58}
+.sliver{position:absolute;left:16px;width:170px;height:22px;border-radius:999px;background:#fff8eb;border:2px solid #d1b894;box-shadow:inset 0 -4px 0 rgba(0,0,0,.04);touch-action:none;cursor:grab}
+.sliver.s1{top:28%}.sliver.s2{top:40%}.sliver.s3{top:52%}.sliver.s4{top:64%}
+.merged-yarn{position:absolute;right:135px;top:50%;width:118px;height:26px;border-radius:999px;background:#fff7e8;border:2px solid #c8a880;transform:translateY(-50%) scaleX(0);transform-origin:right;transition:.4s}
+
+/* 粗纱 */
+.roving-scene{position:absolute;inset:88px 16px 76px}
+.roving-track{position:absolute;left:14px;right:14px;top:44%;height:120px;border-radius:24px;background:rgba(255,250,240,.74);border:1px solid #decdb3}
+.roving-yarn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:22px;width:190px;border-radius:999px;background:repeating-linear-gradient(90deg,#f9eddc 0 9px,#d6b892 9px 15px);border:2px solid #c7a77e;transition:.2s}
+.grip{position:absolute;top:50%;width:48px;height:72px;margin-top:-36px;border-radius:20px;background:#7a9a94;border:3px solid #3e6862;display:grid;place-items:center;color:white;font-size:26px;touch-action:none}
+.grip.left{left:4px}.grip.right{right:4px}
+.twist-wheel{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:104px;height:104px;border-radius:50%;border:8px double #825537;background:#ead6ba;display:grid;place-items:center;font-size:12px;color:#6b4a33;touch-action:none}
+
+/* 细纱 */
+.spin-scene{position:absolute;inset:86px 14px 72px}
+.spindle{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:110px;height:270px;touch-action:none}
+.spindle .rod{position:absolute;left:50%;top:0;bottom:0;width:10px;background:#8c653f;transform:translateX(-50%);border-radius:8px}
+.spindle .cone{position:absolute;left:15px;right:15px;top:56px;height:170px;clip-path:polygon(31% 0,69% 0,100% 100%,0 100%);background:repeating-linear-gradient(8deg,#fff8eb 0 9px,#d9c3a3 9px 12px);border-radius:12px}
+.ring-guide{position:absolute;left:50%;top:48%;width:270px;height:270px;border:3px dashed #b98a61;border-radius:50%;transform:translate(-50%,-50%);opacity:.75}
+
+/* 打包 */
+.pack-scene{position:absolute;inset:82px 12px 68px}
+.box{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:270px;height:170px;background:#b88755;border:4px solid #7b5737;border-radius:16px 16px 24px 24px}
+.box:before{content:"";position:absolute;left:0;right:0;top:-34px;height:38px;border:4px solid #7b5737;border-bottom:none;background:#cea06d;transform-origin:bottom;transition:.35s}
+.box.sealed:before{transform:rotateX(80deg)}
+.cone-item{position:absolute;width:64px;height:100px;touch-action:none;cursor:grab}
+.cone-item .c{position:absolute;inset:0;clip-path:polygon(31% 0,69% 0,100% 100%,0 100%);background:repeating-linear-gradient(8deg,#fff8eb 0 8px,#d8c2a4 8px 11px);border-radius:8px;filter:drop-shadow(0 5px 4px rgba(0,0,0,.1))}
+.cone-item.i1{left:28px;top:42px}.cone-item.i2{left:50%;top:30px;transform:translateX(-50%)}.cone-item.i3{right:28px;top:42px}
+.seal-zone{position:absolute;left:50%;top:20px;transform:translateX(-50%);padding:10px 14px;border-radius:999px;border:1px dashed #b98a61;color:#845a38;font-size:12px}
+
+/* 完成 */
+.finish{text-align:center;padding-top:30px}
+.medal{width:132px;height:132px;border-radius:50%;margin:20px auto 14px;background:radial-gradient(circle,#fff9ee 0 45%,#e8d3b2 46% 63%,#b98355 64% 100%);display:grid;place-items:center;box-shadow:var(--shadow)}
+.timeline{display:flex;align-items:center;justify-content:space-between;gap:4px;margin:28px 0 24px;padding:0 4px}
+.tstep{width:48px;text-align:center;font-size:10px;color:var(--muted)}
+.tstep .ico{width:42px;height:42px;border-radius:14px;background:#f2e4cf;border:1px solid #dbc6a9;margin:0 auto 6px;display:grid;place-items:center;font-size:19px}
+@media (max-width:360px){.hero h1{font-size:35px}.node{min-height:138px}.interact-card{min-height:525px}}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="paper-noise"></div>
+<svg class="ink-bg" viewBox="0 0 460 320" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 255 C70 190,90 210,132 155 C165 112,185 150,210 126 C238 99,264 145,301 110 C347 67,374 117,460 62 L460 320 L0 320 Z" fill="#6b725d"/>
+  <path d="M0 300 C100 220,135 262,205 190 C260 135,285 230,350 172 C395 132,420 166,460 140 L460 320 L0 320 Z" fill="#93977d"/>
+</svg>
+
+<!-- 封面 -->
+<section class="screen active" id="s0">
+  <div class="topbar">
+    <div class="brand"><div class="seal">杭<br>一棉</div><div>杭一棉<div class="mini">HANGZHOU NO.1 COTTON MILL</div></div></div>
+    <button class="menu" aria-label="菜单">≡</button>
+  </div>
+  <div class="hero">
+    <div class="mini">走进杭州第一棉纺织厂 · 体验真实工艺</div>
+    <h1>一团棉花，<br/>如何变成一根纱？</h1>
+    <p>用手指完成一次“清花—梳棉—并条—粗纱—细纱—整理打包”。</p>
+  </div>
+  <div class="art-card cover-art">
+    <svg viewBox="0 0 380 300" width="100%" aria-label="棉花和老厂房插画">
+      <rect x="32" y="150" width="310" height="92" rx="10" fill="#d8c3a5" stroke="#8b6a50" stroke-width="3"/>
+      <rect x="57" y="124" width="185" height="34" rx="4" fill="#c9b394" stroke="#8b6a50" stroke-width="3"/>
+      <rect x="285" y="68" width="26" height="96" rx="5" fill="#b88965" stroke="#7c5c45" stroke-width="3"/>
+      <g fill="#6d7f62">
+        <circle cx="70" cy="194" r="29"/><circle cx="318" cy="190" r="31"/><circle cx="280" cy="205" r="22"/>
+      </g>
+      <g fill="#fff7e8" stroke="#c49770" stroke-width="3">
+        <circle cx="150" cy="114" r="43"/><circle cx="201" cy="112" r="50"/><circle cx="174" cy="79" r="42"/>
+        <circle cx="126" cy="89" r="31"/><circle cx="232" cy="82" r="30"/>
+        <circle cx="120" cy="174" r="42"/><circle cx="170" cy="170" r="50"/><circle cx="212" cy="178" r="39"/>
+      </g>
+      <path d="M140 209 C110 245,95 250,80 265" stroke="#607953" stroke-width="8" fill="none"/>
+      <path d="M207 207 C240 238,258 249,285 262" stroke="#607953" stroke-width="8" fill="none"/>
+      <text x="190" y="213" text-anchor="middle" font-size="18" fill="#6b4a35" font-weight="700">杭州第一棉纺织厂</text>
+    </svg>
+  </div>
+  <button class="primary" data-go="1">开始体验 →</button>
+  <div class="cover-foot"><span>一朵棉花</span><span>一段记忆</span><span>一种生活</span></div>
+</section>
+
+<!-- 流程页 -->
+<section class="screen" id="s1">
+  <div class="topbar"><button class="back" data-go="0">‹</button><div class="brand">杭一棉 · 互动体验</div><button class="menu">≡</button></div>
+  <div class="title-row"><h2>纺纱流程</h2><div class="sub">先看看，一团棉花要经历什么</div></div>
+  <div class="process-map art-card">
+    <div class="path">
+      <div class="node"><div class="badge">1</div>
+        <svg viewBox="0 0 120 90" width="100%" height="86"><g fill="#fff6e7" stroke="#bb936d" stroke-width="2"><circle cx="48" cy="52" r="24"/><circle cx="72" cy="50" r="28"/><circle cx="61" cy="31" r="24"/></g><path d="M60 72l0 15" stroke="#667b5c" stroke-width="5"/></svg>
+        <span>清花</span><small>开松 · 除杂</small></div>
+      <div class="node"><div class="badge">2</div>
+        <svg viewBox="0 0 120 90" width="100%" height="86"><rect x="12" y="28" width="96" height="48" rx="10" fill="#5f8d87" stroke="#395c58" stroke-width="3"/><circle cx="42" cy="52" r="18" fill="#e0bd88" stroke="#a26745" stroke-width="4"/><circle cx="80" cy="52" r="14" fill="#d7b37e" stroke="#a26745" stroke-width="4"/></svg>
+        <span>梳棉</span><small>梳理纤维</small></div>
+      <div class="node"><div class="badge">3</div>
+        <svg viewBox="0 0 120 90" width="100%" height="86"><path d="M10 25 C45 25,50 44,78 44" stroke="#fff7e8" stroke-width="12" fill="none"/><path d="M10 43 C42 43,52 48,78 48" stroke="#fff7e8" stroke-width="12" fill="none"/><path d="M10 61 C45 61,50 52,78 52" stroke="#fff7e8" stroke-width="12" fill="none"/><path d="M78 48H110" stroke="#d6b993" stroke-width="14"/></svg>
+        <span>并条</span><small>多条合一</small></div>
+      <div class="node"><div class="badge">4</div>
+        <svg viewBox="0 0 120 90" width="100%" height="86"><rect x="8" y="28" width="22" height="38" rx="7" fill="#6c8f88"/><rect x="90" y="28" width="22" height="38" rx="7" fill="#6c8f88"/><path d="M30 47H90" stroke="#c9a77e" stroke-width="12"/><path d="M40 47c10-10 20 10 30 0s20 10 30 0" stroke="#7b5737" stroke-width="3" fill="none"/></svg>
+        <span>粗纱</span><small>牵伸 · 初捻</small></div>
+      <div class="node"><div class="badge">5</div>
+        <svg viewBox="0 0 120 90" width="100%" height="86"><path d="M42 20h36l12 58H30z" fill="#fff7e8" stroke="#b99570" stroke-width="3"/><path d="M38 34h44M36 45h48M34 56h52M32 67h56" stroke="#cfb493" stroke-width="3"/></svg>
+        <span>细纱</span><small>牵伸 · 加捻</small></div>
+      <div class="node"><div class="badge">6</div>
+        <svg viewBox="0 0 120 90" width="100%" height="86"><rect x="22" y="34" width="76" height="46" rx="7" fill="#bf8c5d" stroke="#775335" stroke-width="3"/><path d="M22 50h76M60 34v46" stroke="#775335" stroke-width="3"/><path d="M22 34l22-14h32l22 14" fill="#d6aa79" stroke="#775335" stroke-width="3"/></svg>
+        <span>整理打包</span><small>卷装 · 入库</small></div>
+    </div>
+  </div>
+  <button class="primary" data-go="2">进入生产线 →</button>
+</section>
+
+<!-- 清花 -->
+<section class="screen" id="s2">
+  <div class="topbar"><button class="back" data-go="1">‹</button><div></div><div class="mini">1/6</div></div>
+  <h2 class="stage">清花</h2><div class="progress"></div>
+  <div class="interact-card">
+    <div class="tip">把棉花里的叶片、籽壳拖进废料篮</div>
+    <div class="gesture swipe"><span class="hand">☝️</span><span>拖动</span></div>
+    <div class="clean-scene">
+      <div class="cotton-bin"><div class="cotton-puff p1"></div><div class="cotton-puff p2"></div><div class="cotton-puff p3"></div></div>
+      <div class="trash-basket" id="basket"></div>
+      <div class="debris" style="left:30%;top:30%" data-drag="trash"><svg viewBox="0 0 40 40"><path d="M7 28C8 13 22 5 34 8 31 21 22 33 7 28Z" fill="#78925f" stroke="#4d6f46" stroke-width="2"/><path d="M10 27C18 20 24 15 31 11" stroke="#4d6f46" stroke-width="2"/></svg></div>
+      <div class="debris" style="left:53%;top:24%" data-drag="trash"><svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="10" ry="15" fill="#8d6b4a" stroke="#654832" stroke-width="2"/><path d="M14 12l13 17" stroke="#d2b187" stroke-width="2"/></svg></div>
+      <div class="debris" style="left:42%;top:50%" data-drag="trash"><svg viewBox="0 0 40 40"><path d="M8 25c8-17 20-18 25-12-3 13-12 21-25 12Z" fill="#6f8f58" stroke="#4e6c42" stroke-width="2"/></svg></div>
+      <div class="debris" style="left:61%;top:48%" data-drag="trash"><svg viewBox="0 0 40 40"><rect x="12" y="9" width="16" height="23" rx="7" fill="#9d7650" stroke="#674b35" stroke-width="2"/></svg></div>
+    </div>
+    <div class="feedback">清花：开松棉块，同时除去籽壳、尘土等杂质。</div>
+  </div>
+  <div class="nextbar"><button class="secondary" data-reset="2">重来</button><button class="primary" id="next2" disabled data-go="3">下一步 →</button></div>
+</section>
+
+<!-- 梳棉 -->
+<section class="screen" id="s3">
+  <div class="topbar"><button class="back" data-go="2">‹</button><div></div><div class="mini">2/6</div></div>
+  <h2 class="stage">梳棉</h2><div class="progress"></div>
+  <div class="interact-card">
+    <div class="tip">在机器上向右滑动 4 次，把纤维梳顺</div>
+    <div class="gesture swipe"><span class="hand">☝️</span><span>向右滑</span></div>
+    <div class="carding-scene" id="cardingScene">
+      <div class="machine-body"><div class="roller r1"></div><div class="roller r2"></div><div class="fiber-zone" id="fiberZone"></div></div>
+    </div>
+    <div class="feedback" id="f3">梳理前：纤维方向杂乱。</div>
+  </div>
+  <div class="nextbar"><button class="secondary" data-reset="3">重来</button><button class="primary" id="next3" disabled data-go="4">下一步 →</button></div>
+</section>
+
+<!-- 并条 -->
+<section class="screen" id="s4">
+  <div class="topbar"><button class="back" data-go="3">‹</button><div></div><div class="mini">3/6</div></div>
+  <h2 class="stage">并条</h2><div class="progress"></div>
+  <div class="interact-card">
+    <div class="tip">把 4 根棉条拖进右侧机器入口</div>
+    <div class="gesture swipe"><span class="hand">☝️</span><span>拖进去</span></div>
+    <div class="draw-scene">
+      <div class="draw-machine" id="drawMachine"></div>
+      <div class="sliver s1" data-drag="sliver"></div><div class="sliver s2" data-drag="sliver"></div>
+      <div class="sliver s3" data-drag="sliver"></div><div class="sliver s4" data-drag="sliver"></div>
+      <div class="merged-yarn" id="mergedYarn"></div>
+    </div>
+    <div class="feedback">并条：多根棉条合并后，粗细更加均匀。</div>
+  </div>
+  <div class="nextbar"><button class="secondary" data-reset="4">重来</button><button class="primary" id="next4" disabled data-go="5">下一步 →</button></div>
+</section>
+
+<!-- 粗纱 -->
+<section class="screen" id="s5">
+  <div class="topbar"><button class="back" data-go="4">‹</button><div></div><div class="mini">4/6</div></div>
+  <h2 class="stage">粗纱</h2><div class="progress"></div>
+  <div class="interact-card">
+    <div class="tip">先把两端拉开，再围着下方圆盘转一圈</div>
+    <div class="gesture swipe"><span class="hand">🤏</span><span>拉伸</span></div>
+    <div class="roving-scene">
+      <div class="roving-track"><div class="roving-yarn" id="rovingYarn"></div><div class="grip left" id="gripL">←</div><div class="grip right" id="gripR">→</div></div>
+      <div class="twist-wheel" id="twistWheel">绕圈加捻</div>
+    </div>
+    <div class="feedback" id="f5">牵伸：把棉条拉细一些。</div>
+  </div>
+  <div class="nextbar"><button class="secondary" data-reset="5">重来</button><button class="primary" id="next5" disabled data-go="6">下一步 →</button></div>
+</section>
+
+<!-- 细纱 -->
+<section class="screen" id="s6">
+  <div class="topbar"><button class="back" data-go="5">‹</button><div></div><div class="mini">5/6</div></div>
+  <h2 class="stage">细纱</h2><div class="progress"></div>
+  <div class="interact-card">
+    <div class="tip">沿虚线围着纱锭画圈，让粗纱继续加捻</div>
+    <div class="gesture circle"><span class="hand">☝️</span></div>
+    <div class="spin-scene" id="spinScene">
+      <div class="ring-guide"></div>
+      <div class="spindle" id="spindle"><div class="rod"></div><div class="cone"></div></div>
+    </div>
+    <div class="feedback" id="f6">连续加捻，使纱线更细、更有强度。</div>
+  </div>
+  <div class="nextbar"><button class="secondary" data-reset="6">重来</button><button class="primary" id="next6" disabled data-go="7">下一步 →</button></div>
+</section>
+
+<!-- 打包 -->
+<section class="screen" id="s7">
+  <div class="topbar"><button class="back" data-go="6">‹</button><div></div><div class="mini">6/6</div></div>
+  <h2 class="stage">整理打包</h2><div class="progress"></div>
+  <div class="interact-card">
+    <div class="tip" id="tip7">把 3 个纱锭拖进包装箱</div>
+    <div class="gesture swipe"><span class="hand">☝️</span><span>拖入箱中</span></div>
+    <div class="pack-scene" id="packScene">
+      <div class="seal-zone hidden" id="sealZone">向下滑动封箱 ↓</div>
+      <div class="cone-item i1" data-drag="cone"><div class="c"></div></div>
+      <div class="cone-item i2" data-drag="cone"><div class="c"></div></div>
+      <div class="cone-item i3" data-drag="cone"><div class="c"></div></div>
+      <div class="box" id="box"></div>
+    </div>
+    <div class="feedback" id="f7">整理卷装后，棉纱进入包装与运输环节。</div>
+  </div>
+  <div class="nextbar"><button class="secondary" data-reset="7">重来</button><button class="primary" id="next7" disabled data-go="8">完成体验 →</button></div>
+</section>
+
+<!-- 完成 -->
+<section class="screen" id="s8">
+  <div class="topbar"><div class="brand">杭一棉 · 体验完成</div><button class="menu">✓</button></div>
+  <div class="finish">
+    <div class="medal">
+      <svg viewBox="0 0 100 100" width="88" height="88"><path d="M34 16h32l12 66H22z" fill="#fff8eb" stroke="#9d7650" stroke-width="3"/><path d="M29 35h42M27 48h46M25 61h50" stroke="#ceb18b" stroke-width="3"/></svg>
+    </div>
+    <div class="done-chip">✓ 已完成 6 道纺纱工序</div>
+    <h2 style="font-family:STKaiti,KaiTi,serif;font-size:32px;margin:14px 0 8px">你把一团棉花，<br/>做成了一根纱</h2>
+    <p class="mini">刚才的每一次拖、划、拉、转，都对应真实生产中的一个关键动作。</p>
+    <div class="timeline">
+      <div class="tstep"><div class="ico">☁</div>清花</div><div class="tstep"><div class="ico">≋</div>梳棉</div>
+      <div class="tstep"><div class="ico">⇉</div>并条</div><div class="tstep"><div class="ico">↝</div>粗纱</div>
+      <div class="tstep"><div class="ico">◎</div>细纱</div><div class="tstep"><div class="ico">□</div>打包</div>
+    </div>
+  </div>
+  <button class="primary" data-go="1">再体验一次</button>
+  <button class="secondary" style="margin-top:10px" data-go="0">返回首页</button>
+</section>
+</div>
+
+<script>
+(function(){
+ const screens=[...document.querySelectorAll('.screen')];
+ const state={cardSwipes:0,trash:0,sliver:0,stretch:0,twist:0,spin:0,cones:0,packSeal:false};
+
+ function show(i){
+   screens.forEach((s,n)=>s.classList.toggle('active',n===i));
+   window.scrollTo(0,0);
+   document.querySelectorAll('.progress').forEach((p)=>{
+     const screen=+p.closest('.screen').id.replace('s','');
+     const step=Math.max(1,Math.min(6,screen-1));
+     p.innerHTML=Array.from({length:6},(_,n)=>'<span class="dot '+(n<step?'on':'')+'"></span>').join('');
+   });
+   setTimeout(()=>{const s=document.querySelector('#s'+i); const g=s&&s.querySelector('.gesture'); if(g) g.classList.remove('hidden')},80);
+ }
+ document.addEventListener('click',e=>{
+   const go=e.target.closest('[data-go]'); if(go && !go.disabled) show(+go.dataset.go);
+   const rs=e.target.closest('[data-reset]'); if(rs) resetStep(+rs.dataset.reset);
+ });
+
+ function hideGesture(el){ const g=el.closest('.screen')?.querySelector('.gesture'); if(g) g.classList.add('hidden'); }
+ function rectOverlap(a,b){return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}
+ function makeDrag(el,onDrop){
+   let startX=0,startY=0,baseX=0,baseY=0,active=false;
+   el.addEventListener('pointerdown',e=>{
+     e.preventDefault(); active=true; hideGesture(el); el.setPointerCapture(e.pointerId);
+     const m=(el.style.transform||'').match(/translate\\((-?\\d+(?:\\.\\d+)?)px,\\s*(-?\\d+(?:\\.\\d+)?)px\\)/);
+     baseX=m?+m[1]:0;baseY=m?+m[2]:0;startX=e.clientX;startY=e.clientY;
+   });
+   el.addEventListener('pointermove',e=>{if(!active)return;el.style.transform=`translate(${baseX+e.clientX-startX}px,${baseY+e.clientY-startY}px)`});
+   el.addEventListener('pointerup',e=>{if(!active)return;active=false; try{el.releasePointerCapture(e.pointerId)}catch(_){} onDrop&&onDrop(el);});
+ }
+ // 清花
+ document.querySelectorAll('#s2 [data-drag="trash"]').forEach(el=>makeDrag(el,(node)=>{
+   const basket=document.querySelector('#basket');
+   if(rectOverlap(node.getBoundingClientRect(),basket.getBoundingClientRect())){
+     node.style.transition='.25s';node.style.opacity='0';node.style.transform+=' scale(.3)';
+     setTimeout(()=>node.remove(),250);state.trash++;
+     if(state.trash>=4){document.querySelector('#next2').disabled=false;document.querySelector('#s2 .feedback').textContent='完成：棉花已经开松并除去主要杂质。'}
+   } else node.style.transform='';
+ }));
+
+ // 梳棉纤维生成
+ function initFibers(){
+   const z=document.querySelector('#fiberZone'); z.innerHTML='';
+   for(let i=0;i<18;i++){let l=document.createElement('div');l.className='fline';l.style.left=(12+Math.random()*18)+'px';l.style.top=(8+i*4.1)+'px';l.style.width=(120+Math.random()*110)+'px';l.style.transform=`rotate(${(-24+Math.random()*48)}deg)`;z.appendChild(l)}
+ }
+ initFibers();
+ let cardStart=null;
+ document.querySelector('#cardingScene').addEventListener('pointerdown',e=>{cardStart=e.clientX;hideGesture(e.currentTarget)});
+ document.querySelector('#cardingScene').addEventListener('pointerup',e=>{
+   if(cardStart!==null && e.clientX-cardStart>55){state.cardSwipes++; const lines=[...document.querySelectorAll('#fiberZone .fline')];lines.forEach((l,i)=>{l.style.left='16px';l.style.width='250px';l.style.transform=`rotate(${Math.max(0,18-state.cardSwipes*5)}deg)`;});
+   document.querySelector('#f3').textContent=`梳理进度：${Math.min(state.cardSwipes,4)}/4`;
+   if(state.cardSwipes>=4){document.querySelector('#next3').disabled=false;document.querySelector('#f3').textContent='完成：纤维已经被梳理成较顺直、均匀的棉条。'}}
+   cardStart=null;
+ });
+
+ // 并条
+ document.querySelectorAll('#s4 [data-drag="sliver"]').forEach(el=>makeDrag(el,(node)=>{
+   const m=document.querySelector('#drawMachine');
+   if(rectOverlap(node.getBoundingClientRect(),m.getBoundingClientRect())){
+     node.style.opacity='0';node.style.pointerEvents='none';state.sliver++;
+     document.querySelector('#mergedYarn').style.transform=`translateY(-50%) scaleX(${state.sliver/4})`;
+     if(state.sliver>=4)document.querySelector('#next4').disabled=false;
+   }else node.style.transform='';
+ }));
+
+ // 粗纱：拉伸 + 绕圈
+ ['#gripL','#gripR'].forEach(sel=>{
+   const el=document.querySelector(sel);let start=null;
+   el.addEventListener('pointerdown',e=>{start={x:e.clientX};hideGesture(el);el.setPointerCapture(e.pointerId)});
+   el.addEventListener('pointermove',e=>{if(!start)return;const dx=e.clientX-start.x; if((sel==='#gripL'&&dx<-15)||(sel==='#gripR'&&dx>15)){state.stretch=Math.min(100,state.stretch+2);document.querySelector('#rovingYarn').style.width=(190+state.stretch*1.2)+'px';document.querySelector('#rovingYarn').style.height=Math.max(9,22-state.stretch*.12)+'px';}});
+   el.addEventListener('pointerup',e=>{start=null});
+ });
+ let angLast=null,total=0;
+ const wheel=document.querySelector('#twistWheel');
+ wheel.addEventListener('pointerdown',e=>{hideGesture(wheel);const r=wheel.getBoundingClientRect();angLast=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2));});
+ wheel.addEventListener('pointermove',e=>{if(angLast===null)return;const r=wheel.getBoundingClientRect();const a=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2));let d=Math.abs(a-angLast);if(d>Math.PI)d=2*Math.PI-d;total+=d;angLast=a;wheel.style.transform=`translateX(-50%) rotate(${total*25}deg)`;state.twist=total; if(state.stretch>35&&state.twist>5){document.querySelector('#next5').disabled=false;document.querySelector('#f5').textContent='完成：棉条被牵伸并加入少量捻度，形成粗纱。'}});
+ wheel.addEventListener('pointerup',()=>angLast=null);
+
+ // 细纱绕圈
+ const spinScene=document.querySelector('#spinScene');let spinLast=null,spinTotal=0;
+ spinScene.addEventListener('pointerdown',e=>{hideGesture(spinScene);const r=spinScene.getBoundingClientRect();spinLast=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2));});
+ spinScene.addEventListener('pointermove',e=>{if(spinLast===null)return;const r=spinScene.getBoundingClientRect();const a=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2));let d=Math.abs(a-spinLast);if(d>Math.PI)d=2*Math.PI-d;spinTotal+=d;spinLast=a;document.querySelector('#spindle').style.transform=`translate(-50%,-50%) rotate(${spinTotal*20}deg)`;document.querySelector('#f6').textContent='加捻中…';if(spinTotal>11){document.querySelector('#next6').disabled=false;document.querySelector('#f6').textContent='完成：粗纱进一步牵伸、加捻，成为更细更强的棉纱。'}});
+ spinScene.addEventListener('pointerup',()=>spinLast=null);
+
+ // 打包
+ document.querySelectorAll('#s7 [data-drag="cone"]').forEach(el=>makeDrag(el,(node)=>{
+   const b=document.querySelector('#box');
+   if(rectOverlap(node.getBoundingClientRect(),b.getBoundingClientRect())){
+     node.style.opacity='.15';node.style.pointerEvents='none';state.cones++;
+     if(state.cones>=3){document.querySelector('#sealZone').classList.remove('hidden');document.querySelector('#tip7').textContent='最后一步：在包装箱上向下滑动封箱';document.querySelector('#f7').textContent='纱锭已装箱，完成封箱即可结束。'}
+   }else node.style.transform='';
+ }));
+ let sealY=null;
+ document.querySelector('#box').addEventListener('pointerdown',e=>{sealY=e.clientY;hideGesture(e.currentTarget)});
+ document.querySelector('#box').addEventListener('pointerup',e=>{if(state.cones>=3&&sealY!==null&&e.clientY-sealY>45){state.packSeal=true;e.currentTarget.classList.add('sealed');document.querySelector('#next7').disabled=false;document.querySelector('#f7').textContent='完成：棉纱已整理、装箱并准备进入运输环节。'}sealY=null});
+
+ function resetStep(i){
+   if(i===2){location.reload();return}
+   if(i===3){state.cardSwipes=0;initFibers();document.querySelector('#next3').disabled=true;document.querySelector('#f3').textContent='梳理前：纤维方向杂乱。';show(3)}
+   if(i===4){location.reload();return}
+   if(i===5){state.stretch=0;state.twist=0;total=0;document.querySelector('#rovingYarn').style='';document.querySelector('#next5').disabled=true;document.querySelector('#f5').textContent='牵伸：把棉条拉细一些。';show(5)}
+   if(i===6){spinTotal=0;document.querySelector('#spindle').style='';document.querySelector('#next6').disabled=true;document.querySelector('#f6').textContent='连续加捻，使纱线更细、更有强度。';show(6)}
+   if(i===7){location.reload();return}
+ }
+ show(0);
+})();
+</script>
+</body>
+</html>
